@@ -1,5 +1,4 @@
 <script lang="ts">
-
   import randomNumber from "../functions/randomNumber";
 
   let form: HTMLDivElement = undefined as unknown as HTMLDivElement;
@@ -27,6 +26,11 @@
     return false;
   }
 
+  function happy() {
+    if (!enough(500)) return;
+    country.stats.happiness += 5;
+  }
+
   function onForm(event: Event) {
     form.style.display = "none";
     game.className = "";
@@ -47,10 +51,10 @@
     // business
     businesses.map((v) => (total += v.money));
 
-    country.stats.money += total;
+    country.stats.money += Math.round(total);
 
     // POPULATION
-    country.stats.population += stats.happiness * 1.5;
+    country.stats.population += Math.round(stats.happiness * 1.5);
     if (country.stats.population > stats.territory * 500) {
       country.stats.population = stats.territory * 500;
     }
@@ -138,10 +142,11 @@
     <p>Money: ${country.stats.money}.</p>
     <p>Population: {country.stats.population} people.</p>
     <p>Happiness: {country.stats.happiness}%.</p>
+    <button on:click={happy} class="text-center p-2 text-lg border m-4">Buy Happiness (500)</button>
     <p>
       Squares: {country.stats.territory}
       {country.stats.territory !== 1 ? "squares" : "square"}.
     </p>
-    <button on:click={expand} class="text-center p-2 text-lg border m-4">Expand</button>
+    <button on:click={expand} class="text-center p-2 text-lg border m-4">Expand (1000)</button>
   </div>
 </div>
