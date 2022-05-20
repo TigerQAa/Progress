@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { map } from "lodash-es";
+
   import randomNumber from "../functions/randomNumber";
 
   let form: HTMLDivElement = undefined as unknown as HTMLDivElement;
@@ -93,6 +95,10 @@
   let businesses: { name: string; money: number; start: number }[] = [
     { name: "Air Factory", money: 100, start: 100 }
   ];
+
+  function totalBusinesses() {
+    return businesses.map((v) => v.money).reduce((acc, cur) => acc + cur);
+  }
 </script>
 
 <div class="start" bind:this={form}>
@@ -149,4 +155,11 @@
     </p>
     <button on:click={expand} class="text-center p-2 text-lg border m-4">Expand (1000)</button>
   </div>
+</div>
+
+<div class="hidden">
+  <h1 class="text-2xl">SCORE:</h1>
+  <h2 class="text-xl">Population: {country.stats.population * 0.5}</h2>
+  <h2 class="text-xl">Territory: {country.stats.territory * 100}</h2>
+  <h2 class="text-xl">Economy: {0.25 * country.stats.money + 0.5 * totalBusinesses()}</h2>
 </div>
