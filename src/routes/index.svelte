@@ -5,11 +5,24 @@
 
   let form: HTMLDivElement = undefined as unknown as HTMLDivElement;
   let game: HTMLDivElement = undefined as unknown as HTMLDivElement;
+  let end: HTMLDivElement = undefined as unknown as HTMLDivElement;
+
+  let announcement = "";
 
   function enoughActions() {
     const enough = turn.actions >= 1;
     if (enough) turn.actions--;
     return enough;
+  }
+
+  function tradeAction() {
+    if (trade.money > country.stats.money) return (announcement = "Invalid trade paramaters.");
+
+    // if (country.resources[trade.resource] < trade.amount) return "Too little resources!";
+
+    if (trade.amount === 0) {
+      if (trade.givenAmount === 0) return (announcement = "Don't just trade money!");
+    }
   }
 
   function enoughCash(amount: number) {
@@ -22,9 +35,9 @@
     if (country.stats.money >= amount && turn.actions >= 1) {
       enoughActions();
       enoughCash(amount);
-
       return true;
     }
+    announcement = "Not enough actions or cash!";
     return false;
   }
 
@@ -33,13 +46,18 @@
     country.stats.happiness += 5;
   }
 
-  function onForm(event: Event) {
+  function start() {
     form.style.display = "none";
     game.className = "";
   }
 
+  function endGame() {
+    game.style.display = "none";
+    end.style.display = "flex";
+  }
+
   function nextTurn() {
-    if (turn.number === 25) return; // TODO: add end function
+    if (turn.number === 25) return endGame(); // TODO: add end function
     turn.number++;
     turn.actions = 2;
 
@@ -84,7 +102,18 @@
       name: "",
       religion: "",
       goverment: ""
-    }
+    },
+
+    resources: [
+      { name: "Rocks", amount: 0 },
+      { name: "Crops", amount: 0 },
+      { name: "Lumber", amount: 0 },
+      { name: "Cotton", amount: 0 },
+      { name: "Animals", amount: 0 },
+      { name: "Spices", amount: 0 },
+      { name: "Water", amount: 0 },
+      { name: "Fossil Fuels", amount: 0 }
+    ]
   };
 
   let turn = {
@@ -99,10 +128,26 @@
   function totalBusinesses() {
     return businesses.map((v) => v.money).reduce((acc, cur) => acc + cur);
   }
+
+  let trade: {
+    resource: keyof typeof country.resources | "";
+    amount: 0 | 1 | 2 | 3;
+    money: number;
+    givenResource: keyof typeof country.resources | "";
+    givenAmount: 0 | 1 | 2 | 3;
+    givenMoney: number;
+  } = {
+    resource: "",
+    amount: 0,
+    money: 0,
+    givenResource: "",
+    givenAmount: 0,
+    givenMoney: 0
+  };
 </script>
 
 <div class="start" bind:this={form}>
-  <form on:submit|preventDefault={onForm}>
+  <form on:submit|preventDefault={start}>
     <input type="text" placeholder="Name" bind:value={country.traits.name} required />
 
     <select bind:value={country.traits.religion} required>
@@ -129,6 +174,7 @@
 
 <div class="hidden" bind:this={game}>
   <div class="text-center">
+    <h1 class="text-2xl">{announcement}</h1>
     <h1 class="text-center text-6xl font-bold">{country.traits.name}</h1>
     <br />
     <h3 class="text-center text-lg font-bold">
@@ -155,11 +201,41 @@
     </p>
     <button on:click={expand} class="text-center p-2 text-lg border m-4">Expand (1000)</button>
   </div>
+
+  <div class="float-right border p-4 block">
+    {#each country.resources as resource}
+      <p>{resource.name}: {resource.amount}.</p>
+    {/each}
+  </div>
+  <br />
+  <div class="float-right border p-4 block">
+    <h1 class="text-xl">Trade</h1>
+    <form>
+      <select>
+        <option value="" disabled selected>Resource</option>
+        {#each country.resources as resource}
+          <option value={resource.name}>
+            {resource.name}
+          </option>
+        {/each}
+      </select>
+      <br />
+
+      <input type="text" placeholder="Amount" />
+      <br />
+      <input type="text" placeholder="Money" />
+      <br />
+      <button class="border border-black p-2">Trade!</button>
+    </form>
+  </div>
 </div>
 
-<div class="hidden">
-  <h1 class="text-2xl">SCORE:</h1>
-  <h2 class="text-xl">Population: {country.stats.population * 0.5}</h2>
-  <h2 class="text-xl">Territory: {country.stats.territory * 100}</h2>
-  <h2 class="text-xl">Economy: {0.25 * country.stats.money + 0.5 * totalBusinesses()}</h2>
+<div class="hidden text-center" bind:this={end}>
+  <h1 class="text-2xl w-full">SCORE:</h1>
+  <br />
+  <h2 class="text-xl text-center">Population: {country.stats.population * 0.5}</h2>
+  <h2 class="text-xl text-center">Territory: {country.stats.territory * 100}</h2>
+  <h2 class="text-xl text-center">
+    Economy: {0.25 * country.stats.money + 0.5 * totalBusinesses()}
+  </h2>
 </div>
