@@ -1,5 +1,5 @@
-import random from "lodash-es/random";
-
+import random from "lodash-es/random.js";
+let usePseudoo = false;
 export default async function randomNumber(start: number, end: number, usePseudo: boolean): Promise<number> {
 	if (usePseudo) return random(start, end);
 

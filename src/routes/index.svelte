@@ -1,9 +1,6 @@
 <script lang="ts">
-  import { Alert } from "flowbite-svelte";
 
   import randomNumber from "../functions/randomNumber";
-
-  let usePseudo = false;
 
   let form: HTMLDivElement = undefined as unknown as HTMLDivElement;
   let game: HTMLDivElement = undefined as unknown as HTMLDivElement;
