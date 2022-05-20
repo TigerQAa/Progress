@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { find } from "lodash-es";
+
   import { map } from "lodash-es";
 
   import randomNumber from "../functions/randomNumber";
@@ -20,8 +22,18 @@
 
     // if (country.resources[trade.resource] < trade.amount) return "Too little resources!";
 
-    if (trade.amount === 0) {
-      if (trade.givenAmount === 0) return (announcement = "Don't just trade money!");
+    if (trade.amount <= 0) {
+      if (trade.givenAmount <= 0) return (announcement = "Don't just trade money!");
+      if (trade.givenAmount > 3) return (announcement = "Too much traded!");
+      if (trade.givenResource === "") return (announcement = "No resource selected!");
+      if (trade.money <= 0) return (announcement = "You cant have it for free! :(");
+      const resource = findResource(trade.givenResource);
+      if (!resource) return (announcement = "Could not find resource! WHAT DID YOU DO!!!");
+      if (!enough(trade.money)) return (announcement = "Not enough actions or money!");
+
+      country.stats.money -= Math.ceil(trade.money);
+      country.stats.money += Math.ceil(trade.givenMoney);
+      resource.amount += Math.ceil(trade.givenAmount);
     }
   }
 
@@ -129,11 +141,15 @@
     return businesses.map((v) => v.money).reduce((acc, cur) => acc + cur);
   }
 
+  function findResource(name: string) {
+    return country.resources.find((v) => v.name === name);
+  }
+
   let trade: {
-    resource: keyof typeof country.resources | "";
+    resource: string | "";
     amount: 0 | 1 | 2 | 3;
     money: number;
-    givenResource: keyof typeof country.resources | "";
+    givenResource: string | "";
     givenAmount: 0 | 1 | 2 | 3;
     givenMoney: number;
   } = {
@@ -230,12 +246,12 @@
   </div>
 </div>
 
-<div class="hidden text-center" bind:this={end}>
+<div class="hidden" bind:this={end}>
   <h1 class="text-2xl w-full">SCORE:</h1>
   <br />
-  <h2 class="text-xl text-center">Population: {country.stats.population * 0.5}</h2>
-  <h2 class="text-xl text-center">Territory: {country.stats.territory * 100}</h2>
-  <h2 class="text-xl text-center">
+  <h2 class="text-xl">Population: {country.stats.population * 0.5}</h2>
+  <h2 class="text-xl">Territory: {country.stats.territory * 100}</h2>
+  <h2 class="text-xl">
     Economy: {0.25 * country.stats.money + 0.5 * totalBusinesses()}
   </h2>
 </div>
