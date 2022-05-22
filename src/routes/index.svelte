@@ -34,7 +34,30 @@
       country.stats.money -= Math.ceil(trade.money);
       country.stats.money += Math.ceil(trade.givenMoney);
       resource.amount += Math.ceil(trade.givenAmount);
+
+      return;
     }
+
+    if (trade.amount > 0 && trade.amount === Math.round(trade.amount)) {
+      if (trade.givenAmount > 3 || trade.amount > 3) return (announcement = "Too much traded!");
+      if (trade.givenResource === "" || trade.resource === "")
+        return (announcement = "No resource selected!");
+
+      const givenResource = findResource(trade.givenResource);
+      const resource = findResource(trade.resource);
+      if (!resource) return (announcement = "Could not find resource! WHAT DID YOU DO!!!");
+      if (!enough(trade.money)) return (announcement = "Not enough actions or money!");
+
+      country.stats.money -= Math.ceil(trade.money);
+      country.stats.money += Math.ceil(trade.givenMoney);
+      if (givenResource) givenResource.amount += Math.ceil(trade.givenAmount);
+
+      resource.amount -= trade.givenAmount;
+
+      return;
+    }
+
+    return (announcement = "Trade did not work for unknown reason!");
   }
 
   function enoughCash(amount: number) {
@@ -69,6 +92,7 @@
   }
 
   function nextTurn() {
+    announcement = "";
     if (turn.number === 25) return endGame(); // TODO: add end function
     turn.number++;
     turn.actions = 2;
@@ -236,7 +260,6 @@
         {/each}
       </select>
       <br />
-
       <input type="text" placeholder="Amount" bind:value={trade.amount} />
       <br />
       <input type="text" placeholder="Money" bind:value={trade.money} />
