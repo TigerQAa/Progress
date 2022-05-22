@@ -88,7 +88,7 @@
 
   function endGame() {
     game.style.display = "none";
-    end.style.display = "flex";
+    end.style.display = "block";
   }
 
   function nextTurn() {
@@ -250,8 +250,8 @@
   <br />
   <div class="float-right border p-4 block">
     <h1 class="text-xl">Trade</h1>
-    <form>
-      <select>
+    <form on:submit|preventDefault={tradeAction}>
+      <select bind:value={trade.resource}>
         <option value="" disabled selected>Resource</option>
         {#each country.resources as resource}
           <option value={resource.name}>
@@ -260,10 +260,22 @@
         {/each}
       </select>
       <br />
-
-      <input type="text" placeholder="Amount" />
+      <input type="text" placeholder="Amount" bind:value={trade.amount} />
       <br />
-      <input type="text" placeholder="Money" />
+      <input type="text" placeholder="Money" bind:value={trade.money} />
+      <br />
+      <select bind:value={trade.givenResource}>
+        <option value="" disabled selected>Given Resource</option>
+        {#each country.resources as resource}
+          <option value={resource.name}>
+            {resource.name}
+          </option>
+        {/each}
+      </select>
+      <br />
+      <input type="text" placeholder="Amount Given" bind:value={trade.amount} />
+      <br />
+      <input type="text" placeholder="Money Given" bind:value={trade.money} />
       <br />
       <button class="border border-black p-2">Trade!</button>
     </form>
@@ -271,10 +283,12 @@
 </div>
 
 <div class="hidden" bind:this={end}>
-  <h1 class="text-2xl w-full">SCORE:</h1>
+  <h1 class="text-2xl">SCORE:</h1>
   <br />
   <h2 class="text-xl">Population: {country.stats.population * 0.5}</h2>
+  <br />
   <h2 class="text-xl">Territory: {country.stats.territory * 100}</h2>
+  <br />
   <h2 class="text-xl">
     Economy: {0.25 * country.stats.money + 0.5 * totalBusinesses()}
   </h2>
