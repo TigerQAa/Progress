@@ -41,23 +41,23 @@
   }[] = [
     {
       name: "Clothing",
-      resourcesNeeded: [findResource("Cotton")!, findResource("Water")!],
+      resourcesNeeded: [findResource("Cotton")!],
       money: 200
     },
-    {
-      name: "Farm",
-      resourcesNeeded: [findResource("Crops")!, findResource("Animals")!],
+        {
+      name: "Coal Plant",
+      resourcesNeeded: [findResource("Rocks")!, findResource("Fossil Fuels")!],
       money: 400
     },
     {
-      name: "Coal Plant",
-      resourcesNeeded: [findResource("Rocks")!, findResource("Fossil Fuels")!],
+      name: "Farm",
+      resourcesNeeded: [findResource("Crops")!, findResource("Animals")!, findResource("Water")!],
       money: 600
     },
     {
       name: "Luxury Items",
-      resourcesNeeded: [findResource("Cotton")!, findResource("Lumber")!, findResource("Spices")!],
-      money: 1000
+      resourcesNeeded: [findResource("Cotton")!, findResource("Lumber")!, findResource("Spices")!, findResource("Animals")!],
+      money: 800
     }
   ];
 
@@ -73,7 +73,7 @@
     return enough;
   }
 
-  function tradeAction() {
+  function tradeAction(receive: boolean) {
     if (trade.money > country.stats.money) return (announcement = "Invalid trade parameters.");
 
     // if (country.resources[trade.resource] < trade.amount) return "Too little resources!";
@@ -85,9 +85,10 @@
       if (trade.money <= 0) return (announcement = "You cant have it for free! :(");
       const resource = findResource(trade.givenResource);
       if (!resource) return (announcement = "Could not find resource! WHAT DID YOU DO!!!");
-      if (!enough(trade.money)) return (announcement = "Not enough actions or money!");
+      if (receive) {
+        if (!enoughCash(trade.money)) return (announcement = "Not enough money!");
+      } else if (!enough(trade.money)) return (announcement = "Not enough actions or money!");
 
-      country.stats.money -= Math.ceil(trade.money);
       country.stats.money += Math.ceil(trade.givenMoney);
       resource.amount += Math.ceil(trade.givenAmount);
 
@@ -105,7 +106,6 @@
       if (resource.amount < trade.amount) return (announcement = "Too little resources.");
       if (!enough(trade.money)) return (announcement = "Not enough actions or money!");
 
-      country.stats.money -= Math.ceil(trade.money);
       country.stats.money += Math.ceil(trade.givenMoney);
       if (givenResource) givenResource.amount += Math.ceil(trade.givenAmount);
 
@@ -135,7 +135,7 @@
 
   function happy() {
     if (!enough(500)) return;
-    console.log(businesses)
+    console.log(businesses);
     country.stats.happiness += 5;
   }
 
@@ -187,7 +187,7 @@
   }
 
   let options = {
-    religions: ["Christianity", "Islam", "Hinduism", "Buddhism", "Judaism"],
+    religions: ["Christianity", "Islam", "Hinduism", "Buddhism", "Judaism", "Atheism"],
     governments: ["Democracy", "Theocracy", "Monarchy", "Dictatorship", "Oligarchy", "Anarchy"]
   };
 
@@ -221,7 +221,7 @@
 
     business.money += business.start * 0.5;
 
-    businesses = businesses
+    businesses = businesses;
   }
 
   let trade: {
@@ -260,7 +260,7 @@
   function create() {
     if (build === "") return (announcement = "Nothing selected!");
     console.log("e");
-    console.log(build)
+    console.log(build);
     if (!build.resourcesNeeded.every((v) => findResource(v.name)!.amount >= 1))
       return (announcement = "Not enough resources!");
     console.log("e");
@@ -338,39 +338,38 @@
     <br />
     <h1 class="text-xl">You</h1>
     <br />
-    <form on:submit|preventDefault={tradeAction}>
-      <select bind:value={trade.resource}>
-        <option value="" disabled selected>Resource</option>
-        {#each country.resources as resource}
-          <option value={resource.name}>
-            {resource.name}
-          </option>
-        {/each}
-      </select>
-      <br />
-      <p>Amount</p>
-      <input type="text" placeholder="Amount" bind:value={trade.amount} />
-      <p>Money</p>
-      <input type="text" placeholder="Money" bind:value={trade.money} />
-      <br />
+    <select bind:value={trade.resource}>
+      <option value="" disabled selected>Resource</option>
+      {#each country.resources as resource}
+        <option value={resource.name}>
+          {resource.name}
+        </option>
+      {/each}
+    </select>
+    <br />
+    <p>Amount</p>
+    <input type="text" placeholder="Amount" bind:value={trade.amount} />
+    <p>Money</p>
+    <input type="text" placeholder="Money" bind:value={trade.money} />
+    <br />
 
-      <h1 class="text-xl">Them</h1>
-      <select bind:value={trade.givenResource}>
-        <option value="" disabled selected>Resource Given</option>
-        {#each country.resources as resource}
-          <option value={resource.name}>
-            {resource.name}
-          </option>
-        {/each}
-      </select>
-      <br />
-      <p>Amount</p>
-      <input type="text" placeholder="Amount Given" bind:value={trade.givenAmount} />
-      <p>Money</p>
-      <input type="text" placeholder="Money Given" bind:value={trade.givenMoney} />
-      <br />
-      <button class="border border-black p-2">Trade!</button>
-    </form>
+    <h1 class="text-xl">Them</h1>
+    <select bind:value={trade.givenResource}>
+      <option value="" disabled selected>Resource Given</option>
+      {#each country.resources as resource}
+        <option value={resource.name}>
+          {resource.name}
+        </option>
+      {/each}
+    </select>
+    <br />
+    <p>Amount</p>
+    <input type="text" placeholder="Amount Given" bind:value={trade.givenAmount} />
+    <p>Money</p>
+    <input type="text" placeholder="Money Given" bind:value={trade.givenMoney} />
+    <br />
+    <button on:click={() => tradeAction(false)} class="border border-black p-2">Trade!</button>
+    <button on:click={() => tradeAction(true)} class="border border-black p-2">Receive!</button>
   </div>
 
   <div class="float-left border p-4">
