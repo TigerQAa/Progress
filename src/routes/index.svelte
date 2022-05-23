@@ -31,6 +31,22 @@
     ]
   };
 
+  let events: { name: string; desc: string; action: () => void }[] = [
+    {
+      name: "Virus",
+      desc: "Oh no! A virus has taken over your country. It decreases population by 10 * (random 1-6), and decreases your happiness by 5.",
+      action: () => {
+        country.stats.population -= 10 * randomNumber(1, 6);
+        country.stats.happiness -= 5;
+      }
+    }
+  ];
+
+  let event = {
+    name: "",
+    desc: ""
+  };
+
   let allTypesBusinesses: {
     name: string;
     money: number;
@@ -64,6 +80,9 @@
   let form: HTMLDivElement = undefined as unknown as HTMLDivElement;
   let game: HTMLDivElement = undefined as unknown as HTMLDivElement;
   let end: HTMLDivElement = undefined as unknown as HTMLDivElement;
+  let preWar: HTMLButtonElement = undefined as unknown as HTMLButtonElement;
+  let preWar2: HTMLButtonElement = undefined as unknown as HTMLButtonElement;
+  let war: HTMLDivElement = undefined as unknown as HTMLDivElement;
 
   let announcement = "";
 
@@ -135,7 +154,7 @@
 
   function happy() {
     if (!enough(500)) return;
-    console.log(businesses)
+    console.log(businesses);
     country.stats.happiness += 5;
   }
 
@@ -179,6 +198,15 @@
     for (const special of specialized) {
       special.amount += 1;
     }
+
+    const { name, desc, action } = events[randomNumber(0, events.length - 1)];
+
+    event = { name, desc };
+    action();
+
+    country.stats.population < 0 ? (country.stats.population = 0) : null;
+    country.stats.happiness < 0 ? (country.stats.happiness = 0) : null;
+    country.stats.money < 0 ? (country.stats.money = 0) : null;
   }
 
   function expand() {
@@ -221,7 +249,7 @@
 
     business.money += business.start * 0.5;
 
-    businesses = businesses
+    businesses = businesses;
   }
 
   let trade: {
@@ -260,7 +288,7 @@
   function create() {
     if (build === "") return (announcement = "Nothing selected!");
     console.log("e");
-    console.log(build)
+    console.log(build);
     if (!build.resourcesNeeded.every((v) => findResource(v.name)!.amount >= 1))
       return (announcement = "Not enough resources!");
     console.log("e");
@@ -269,6 +297,33 @@
     build.resourcesNeeded.map((v) => (findResource(v.name)!.amount -= 1));
 
     businesses = [...businesses, { name: build.name, money: build.money, start: build.money }];
+  }
+
+  function fight() {
+    if (!enoughActions()) return (announcement = "Not enough actions!");
+    prepare();
+  }
+
+  function defend() {
+    prepare();
+  }
+
+  function prepare() {
+    preWar.style.display = "none";
+    preWar2.style.display = "none";
+    war.style.display = "block";
+  }
+
+  function win(won: boolean) {
+    if (won) {
+      country.stats.territory++;
+    } else {
+      country.stats.territory--;
+    }
+
+    war.style.display = "none";
+    preWar.style.display = "block";
+    preWar2.style.display = "block";
   }
 </script>
 
@@ -326,6 +381,11 @@
       {country.stats.territory !== 1 ? "squares" : "square"}.
     </p>
     <button on:click={expand} class="text-center p-2 text-lg border m-4">Expand (1000)</button>
+  </div>
+
+  <div class="fixed top-0 left-0 border p-4 max-w-md">
+    <h1 class="text-xl">{event.name}</h1>
+    <p>{event.desc}</p>
   </div>
 
   <div class="float-right border p-4 clear-right">
@@ -388,7 +448,19 @@
         <option value={business}>{business.name}</option>
       {/each}
     </select>
-    <button on:click={create}>Build!</button>
+    <button class="border border-black p-2" on:click={create}>Build!</button>
+  </div>
+
+  <div class="fixed left-1/2 bottom-5 mx-auto my-0 origin-[-50%,-50%] border p-4">
+    <h1 class="text-xl">War</h1>
+    <button on:click={fight} bind:this={preWar}>Go to war!</button>
+    <button on:click={defend} bind:this={preWar2}>Defend!</button>
+    <div bind:this={war} class="hidden">
+      <p>Army: {country.stats.happiness + 0.01 * country.stats.population}</p>
+      <p class="text-sm">Did you win?</p>
+      <button class="border border-black p-2" on:click={() => win(true)}>Yes</button>
+      <button class="border border-black p-2" on:click={() => win(false)}>No</button>
+    </div>
   </div>
 </div>
 
