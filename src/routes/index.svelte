@@ -73,10 +73,119 @@
     },
 
     {
+      name: "Farming",
+      desc: "You take over a farm from a past civilization! +2 crops.",
+      action: () => {
+        findResource("Crops")!.amount += 2;
+      }
+    },
+    {
       name: "Mining",
       desc: "You create a mine! +2 rocks.",
       action: () => {
         findResource("Rocks")!.amount += 2;
+      }
+    },
+    {
+      name: "Chopping Trees",
+      desc: "You and your buddies go out to chop some trees! +2 lumber.",
+      action: () => {
+        findResource("Lumber")!.amount += 2;
+      }
+    },
+    {
+      name: "Cloning",
+      desc: "You find out about cloning technology and clone cotton! The scientist forgot how to do it though. +2 cotton.",
+      action: () => {
+        findResource("Cotton")!.amount += 2;
+      }
+    },
+    {
+      name: "Cows",
+      desc: "A bunch of cows tried to declare war. It didn't go well. +2 Animals",
+      action: () => {
+        findResource("Cotton")!.amount += 2;
+      }
+    },
+    {
+      name: "Spices",
+      desc: "Spices rain from the sky. +2 spices.",
+      action: () => {
+        findResource("Spices")!.amount += 2;
+      }
+    },
+    {
+      name: "Water",
+      desc: "You found out that lakes and rivers exist. +2 water.",
+      action: () => {
+        findResource("Water")!.amount += 2;
+      }
+    },
+    {
+      name: "Food Dye",
+      desc: "You dye water black. +2 Fossil Fuels.",
+      action: () => {
+        findResource("Fossil Fuels")!.amount += 2;
+      }
+    },
+    {
+      name: "Food Dye",
+      desc: "You dye water black. +2 Fossil Fuels.",
+      action: () => {
+        findResource("Fossil Fuels")!.amount += 2;
+      }
+    },
+    {
+      name: "Unemployment",
+      desc: "Suitcase shortage. -5 happiness",
+      action: () => {
+        country.stats.happiness -= 5;
+      }
+    },
+    {
+      name: "Animal Revolt.",
+      desc: "All the animals in your country revolt. If you specialize in animals, you don't gain any this turn. Otherwise, nothing happens.",
+      action: () => {
+        if (specialized.find((v) => v.name === "Animal")) findResource("Animals")!.amount--;
+      }
+    },
+    {
+      name: "Winter",
+      desc: "You don't see any sun this winter. If you specialize in cotton, spices, or crops, you don't gain any this turn. Otherwise, nothing happens.",
+      action: () => {
+        if (specialized.find((v) => v.name === "Cotton")) findResource("Cotton")!.amount--;
+        if (specialized.find((v) => v.name === "Spices")) findResource("Spices")!.amount--;
+        if (specialized.find((v) => v.name === "Crops")) findResource("Crops")!.amount--;
+      }
+    },
+    {
+      name: "Forest fire",
+      desc: "Someone has a gender reveal party. If you specialize in lumber, you don't gain any this turn. Otherwise, nothing happens.",
+      action: () => {
+        if (specialized.find((v) => v.name === "Lumber")) findResource("Lumber")!.amount--;
+      }
+    },
+    {
+      name: "Freeze",
+      desc: "All liquid turns to solid. If you specialize in fossil fuels or water, you don't gain any this turn. Otherwise, nothing happens.",
+      action: () => {
+        if (specialized.find((v) => v.name === "Fossil Fuels"))
+          findResource("Fossil Fuels")!.amount--;
+      }
+    },
+    {
+      name: "Baby Boom",
+      desc: "A huge baby (Mia) explodes and turns into 100 babies.",
+      action: () => {
+        country.stats.population += 100;
+      }
+    },
+    {
+      name: "McDonald's",
+      desc: "Lots or new McDonald's locations open up. +100 population & +5 happiness",
+      action: () => {
+        country.stats.population += 100;
+        country.stats.happiness += 5;
       }
     }
   ];
@@ -199,6 +308,8 @@
   }
 
   function happy() {
+    if (country.stats.happiness === 100)
+      return (announcement = "CRY OR SOMETHING BC YOUR TOO HAPPY");
     if (!enough(500)) return;
     country.stats.happiness += 5;
   }
@@ -252,6 +363,10 @@
     country.stats.population < 0 ? (country.stats.population = 0) : null;
     country.stats.happiness < 0 ? (country.stats.happiness = 0) : null;
     country.stats.money < 0 ? (country.stats.money = 0) : null;
+    country.stats.population > country.stats.territory * 500
+      ? (country.stats.population = country.stats.territory * 500)
+      : null;
+    country.stats.happiness < 100 ? (country.stats.happiness = 100) : null;
   }
 
   function expand() {
@@ -266,7 +381,7 @@
 
   let turn = {
     number: 1,
-    actions: 2
+    actions: 3
   };
 
   let businesses: { name: string; money: number; start: number }[] = [
@@ -314,6 +429,7 @@
   };
 
   let specialized = [
+    country.resources[randomNumber(0, 7)],
     country.resources[randomNumber(0, 7)],
     country.resources[randomNumber(0, 7)],
     country.resources[randomNumber(0, 7)]
@@ -512,7 +628,7 @@
   <h2 class="text-xl">Territory: {country.stats.territory * 100}</h2>
   <br />
   <h2 class="text-xl">
-    Economy: {0.25 * country.stats.money + 0.5 * totalBusinesses()}
+    Economy: {0.01 * country.stats.money + 0.01 * totalBusinesses()}
   </h2>
   <br />
   <h1 class="text-2xl">
