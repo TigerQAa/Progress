@@ -39,6 +39,45 @@
         country.stats.population -= 10 * randomNumber(1, 6);
         country.stats.happiness -= 5;
       }
+    },
+    {
+      name: "Volcano",
+      desc: "Boom! A volcano kills 40% of one of your territories!",
+      action: () => {
+        country.stats.population -= 200;
+      }
+    },
+
+    {
+      name: "Tornado",
+      desc: "You lose 10% of one territories population.",
+      action: () => {
+        country.stats.population -= 50;
+      }
+    },
+
+    {
+      name: "Carnaval!",
+      desc: "The circus comes! +5 happiness.",
+      action: () => {
+        country.stats.happiness += 5;
+      }
+    },
+
+    {
+      name: "Gold",
+      desc: "Gold rush! +2000 money.",
+      action: () => {
+        country.stats.money += 2000;
+      }
+    },
+
+    {
+      name: "Mining",
+      desc: "You create a mine! +2 rocks.",
+      action: () => {
+        findResource("Rocks")!.amount += 2;
+      }
     }
   ];
 
