@@ -193,7 +193,6 @@
 
   function happy() {
     if (!enough(500)) return;
-    console.log(businesses);
     country.stats.happiness += 5;
   }
 
@@ -326,13 +325,9 @@
 
   function create() {
     if (build === "") return (announcement = "Nothing selected!");
-    console.log("e");
-    console.log(build);
     if (!build.resourcesNeeded.every((v) => findResource(v.name)!.amount >= 1))
       return (announcement = "Not enough resources!");
-    console.log("e");
     if (!enough(build.money)) return (announcement = "Not enough actions or money");
-    console.log("e");
     build.resourcesNeeded.map((v) => (findResource(v.name)!.amount -= 1));
 
     businesses = [...businesses, { name: build.name, money: build.money, start: build.money }];
@@ -515,8 +510,8 @@
   </h2>
   <br />
   <h1 class="text-2xl">
-    Total: {0.25 * country.stats.money +
-      0.5 * totalBusinesses() +
+    Total: {0.01 * country.stats.money +
+      0.01 * totalBusinesses() +
       country.stats.territory * 100 +
       country.stats.population * 0.5}
   </h1>
