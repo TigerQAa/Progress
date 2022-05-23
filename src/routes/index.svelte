@@ -5,6 +5,62 @@
 
   import randomNumber from "../functions/randomNumber";
 
+  let country = {
+    stats: {
+      money: 1000,
+      happiness: 60,
+      population: 300,
+      territory: 1
+    },
+
+    traits: {
+      name: "",
+      religion: "",
+      government: ""
+    },
+
+    resources: [
+      { name: "Rocks", amount: 0 },
+      { name: "Crops", amount: 0 },
+      { name: "Lumber", amount: 0 },
+      { name: "Cotton", amount: 0 },
+      { name: "Animals", amount: 0 },
+      { name: "Spices", amount: 0 },
+      { name: "Water", amount: 0 },
+      { name: "Fossil Fuels", amount: 0 }
+    ]
+  };
+
+  let allTypesBusinesses: {
+    name: string;
+    money: number;
+    resourcesNeeded: {
+      name: string;
+      amount: number;
+    }[];
+  }[] = [
+    {
+      name: "Clothing",
+      resourcesNeeded: [findResource("Cotton")!, findResource("Water")!],
+      money: 200
+    },
+    {
+      name: "Farm",
+      resourcesNeeded: [findResource("Crops")!, findResource("Animals")!],
+      money: 400
+    },
+    {
+      name: "Coal Plant",
+      resourcesNeeded: [findResource("Rocks")!, findResource("Fossil Fuels")!],
+      money: 600
+    },
+    {
+      name: "Luxury Items",
+      resourcesNeeded: [findResource("Cotton")!, findResource("Lumber")!, findResource("Spices")!],
+      money: 1000
+    }
+  ];
+
   let form: HTMLDivElement = undefined as unknown as HTMLDivElement;
   let game: HTMLDivElement = undefined as unknown as HTMLDivElement;
   let end: HTMLDivElement = undefined as unknown as HTMLDivElement;
@@ -18,7 +74,7 @@
   }
 
   function tradeAction() {
-    if (trade.money > country.stats.money) return (announcement = "Invalid trade paramaters.");
+    if (trade.money > country.stats.money) return (announcement = "Invalid trade parameters.");
 
     // if (country.resources[trade.resource] < trade.amount) return "Too little resources!";
 
@@ -38,7 +94,7 @@
       return;
     }
 
-    if (trade.amount > 0 && trade.amount === Math.round(trade.amount)) {
+    if (trade.amount > 0) {
       if (trade.givenAmount > 3 || trade.amount > 3) return (announcement = "Too much traded!");
       if (trade.givenResource === "" || trade.resource === "")
         return (announcement = "No resource selected!");
@@ -46,6 +102,7 @@
       const givenResource = findResource(trade.givenResource);
       const resource = findResource(trade.resource);
       if (!resource) return (announcement = "Could not find resource! WHAT DID YOU DO!!!");
+      if (resource.amount < trade.amount) return (announcement = "Too little resources.");
       if (!enough(trade.money)) return (announcement = "Not enough actions or money!");
 
       country.stats.money -= Math.ceil(trade.money);
@@ -78,12 +135,16 @@
 
   function happy() {
     if (!enough(500)) return;
+    console.log(businesses)
     country.stats.happiness += 5;
   }
 
-  function start() {
+  async function start() {
     form.style.display = "none";
-    game.className = "";
+    game.style.display = "block";
+    for (const special of specialized) {
+      special.amount += 1;
+    }
   }
 
   function endGame() {
@@ -114,6 +175,10 @@
     if (country.stats.population > stats.territory * 500) {
       country.stats.population = stats.territory * 500;
     }
+
+    for (const special of specialized) {
+      special.amount += 1;
+    }
   }
 
   function expand() {
@@ -123,33 +188,7 @@
 
   let options = {
     religions: ["Christianity", "Islam", "Hinduism", "Buddhism", "Judaism"],
-    goverments: ["Democracy", "Theocracy", "Monarchy", "Dictatorship", "Oligarchy", "Anarchy"]
-  };
-
-  let country = {
-    stats: {
-      money: 1000,
-      happiness: 60,
-      population: 300,
-      territory: 1
-    },
-
-    traits: {
-      name: "",
-      religion: "",
-      goverment: ""
-    },
-
-    resources: [
-      { name: "Rocks", amount: 0 },
-      { name: "Crops", amount: 0 },
-      { name: "Lumber", amount: 0 },
-      { name: "Cotton", amount: 0 },
-      { name: "Animals", amount: 0 },
-      { name: "Spices", amount: 0 },
-      { name: "Water", amount: 0 },
-      { name: "Fossil Fuels", amount: 0 }
-    ]
+    governments: ["Democracy", "Theocracy", "Monarchy", "Dictatorship", "Oligarchy", "Anarchy"]
   };
 
   let turn = {
@@ -165,8 +204,24 @@
     return businesses.map((v) => v.money).reduce((acc, cur) => acc + cur);
   }
 
+  function findBusinessType(name: string) {
+    return allTypesBusinesses.find((v) => v.name === name);
+  }
+
+  function findBusiness(name: string) {
+    return businesses.find((v) => v.name === name);
+  }
+
   function findResource(name: string) {
     return country.resources.find((v) => v.name === name);
+  }
+
+  function upgrade(business: { name: string; money: number; start: number }) {
+    if (!enough(business.start * 2)) return (announcement = "Not enough!");
+
+    business.money += business.start * 0.5;
+
+    businesses = businesses
   }
 
   let trade: {
@@ -184,6 +239,37 @@
     givenAmount: 0,
     givenMoney: 0
   };
+
+  let specialized = [
+    country.resources[randomNumber(0, 7)],
+    country.resources[randomNumber(0, 7)],
+    country.resources[randomNumber(0, 7)]
+  ];
+
+  let build:
+    | ""
+    | {
+        name: string;
+        money: number;
+        resourcesNeeded: {
+          name: string;
+          amount: number;
+        }[];
+      } = "";
+
+  function create() {
+    if (build === "") return (announcement = "Nothing selected!");
+    console.log("e");
+    console.log(build)
+    if (!build.resourcesNeeded.every((v) => findResource(v.name)!.amount >= 1))
+      return (announcement = "Not enough resources!");
+    console.log("e");
+    if (!enough(build.money)) return (announcement = "Not enough actions or money");
+    console.log("e");
+    build.resourcesNeeded.map((v) => (findResource(v.name)!.amount -= 1));
+
+    businesses = [...businesses, { name: build.name, money: build.money, start: build.money }];
+  }
 </script>
 
 <div class="start" bind:this={form}>
@@ -199,11 +285,11 @@
       {/each}
     </select>
 
-    <select bind:value={country.traits.goverment} required>
-      <option value="" disabled selected>Goverment</option>
-      {#each options.goverments as goverment}
-        <option value={goverment}>
-          {goverment}
+    <select bind:value={country.traits.government} required>
+      <option value="" disabled selected>Government</option>
+      {#each options.governments as government}
+        <option value={government}>
+          {government}
         </option>
       {/each}
     </select>
@@ -218,8 +304,8 @@
     <h1 class="text-center text-6xl font-bold">{country.traits.name}</h1>
     <br />
     <h3 class="text-center text-lg font-bold">
-      You are {country.traits.goverment === "Anarchy" ? "an" : "a"}
-      {country.traits.goverment} that believes in {country.traits.religion}.
+      You are {country.traits.government === "Anarchy" ? "an" : "a"}
+      {country.traits.government} that believes in {country.traits.religion}.
     </h3>
   </div>
 
@@ -230,7 +316,7 @@
     <h1 class="text-xl">Actions: {turn.actions}</h1>
   </div>
 
-  <div class="float-left border p-4">
+  <div class="float-left block border p-4 clear-right">
     <p>Money: ${country.stats.money}.</p>
     <p>Population: {country.stats.population} people.</p>
     <p>Happiness: {country.stats.happiness}%.</p>
@@ -242,14 +328,16 @@
     <button on:click={expand} class="text-center p-2 text-lg border m-4">Expand (1000)</button>
   </div>
 
-  <div class="float-right border p-4 block">
+  <div class="float-right border p-4 clear-right">
     {#each country.resources as resource}
       <p>{resource.name}: {resource.amount}.</p>
     {/each}
   </div>
-  <br />
-  <div class="float-right border p-4 block">
+  <div class="float-right border p-4">
     <h1 class="text-xl">Trade</h1>
+    <br />
+    <h1 class="text-xl">You</h1>
+    <br />
     <form on:submit|preventDefault={tradeAction}>
       <select bind:value={trade.resource}>
         <option value="" disabled selected>Resource</option>
@@ -260,12 +348,15 @@
         {/each}
       </select>
       <br />
+      <p>Amount</p>
       <input type="text" placeholder="Amount" bind:value={trade.amount} />
-      <br />
+      <p>Money</p>
       <input type="text" placeholder="Money" bind:value={trade.money} />
       <br />
+
+      <h1 class="text-xl">Them</h1>
       <select bind:value={trade.givenResource}>
-        <option value="" disabled selected>Given Resource</option>
+        <option value="" disabled selected>Resource Given</option>
         {#each country.resources as resource}
           <option value={resource.name}>
             {resource.name}
@@ -273,12 +364,31 @@
         {/each}
       </select>
       <br />
+      <p>Amount</p>
       <input type="text" placeholder="Amount Given" bind:value={trade.givenAmount} />
-      <br />
+      <p>Money</p>
       <input type="text" placeholder="Money Given" bind:value={trade.givenMoney} />
       <br />
       <button class="border border-black p-2">Trade!</button>
     </form>
+  </div>
+
+  <div class="float-left border p-4">
+    {#each businesses as business}
+      <div class="block">
+        <p class="inline-block">{business.name}: ${business.money} per turn.</p>
+        <button class="border border-black p-2 inline-block" on:click={() => upgrade(business)}
+          >Upgrade!</button
+        >
+      </div>
+    {/each}
+    <select bind:value={build}>
+      <option value="" disabled selected>Business</option>
+      {#each allTypesBusinesses as business}
+        <option value={business}>{business.name}</option>
+      {/each}
+    </select>
+    <button on:click={create}>Build!</button>
   </div>
 </div>
 
@@ -292,4 +402,11 @@
   <h2 class="text-xl">
     Economy: {0.25 * country.stats.money + 0.5 * totalBusinesses()}
   </h2>
+  <br />
+  <h1 class="text-2xl">
+    Total: {0.25 * country.stats.money +
+      0.5 * totalBusinesses() +
+      country.stats.territory * 100 +
+      country.stats.population * 0.5}
+  </h1>
 </div>
