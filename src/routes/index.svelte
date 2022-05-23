@@ -99,7 +99,7 @@
       resourcesNeeded: [findResource("Cotton")!],
       money: 200
     },
-        {
+    {
       name: "Coal Plant",
       resourcesNeeded: [findResource("Rocks")!, findResource("Fossil Fuels")!],
       money: 400
@@ -111,7 +111,12 @@
     },
     {
       name: "Luxury Items",
-      resourcesNeeded: [findResource("Cotton")!, findResource("Lumber")!, findResource("Spices")!, findResource("Animals")!],
+      resourcesNeeded: [
+        findResource("Cotton")!,
+        findResource("Lumber")!,
+        findResource("Spices")!,
+        findResource("Animals")!
+      ],
       money: 800
     }
   ];
@@ -162,7 +167,9 @@
       const resource = findResource(trade.resource);
       if (!resource) return (announcement = "Could not find resource! WHAT DID YOU DO!!!");
       if (resource.amount < trade.amount) return (announcement = "Too little resources.");
-      if (!enough(trade.money)) return (announcement = "Not enough actions or money!");
+      if (receive) {
+        if (!enoughCash(trade.money)) return (announcement = "Not enough money!");
+      } else if (!enough(trade.money)) return (announcement = "Not enough actions or money!");
 
       country.stats.money += Math.ceil(trade.givenMoney);
       if (givenResource) givenResource.amount += Math.ceil(trade.givenAmount);
