@@ -104,7 +104,7 @@
       name: "Cows",
       desc: "A bunch of cows tried to declare war. It didn't go well. +2 Animals",
       action: () => {
-        findResource("Cotton")!.amount += 2;
+        findResource("Animals")!.amount += 2;
       }
     },
     {
@@ -119,13 +119,6 @@
       desc: "You found out that lakes and rivers exist. +2 water.",
       action: () => {
         findResource("Water")!.amount += 2;
-      }
-    },
-    {
-      name: "Food Dye",
-      desc: "You dye water black. +2 Fossil Fuels.",
-      action: () => {
-        findResource("Fossil Fuels")!.amount += 2;
       }
     },
     {
@@ -331,7 +324,7 @@
     announcement = "";
     if (turn.number === 25) return endGame(); // TODO: add end function
     turn.number++;
-    turn.actions = 2;
+    turn.actions = 3;
 
     const stats = country.stats;
     // ECONOMY
@@ -366,7 +359,7 @@
     country.stats.population > country.stats.territory * 500
       ? (country.stats.population = country.stats.territory * 500)
       : null;
-    country.stats.happiness < 100 ? (country.stats.happiness = 100) : null;
+    country.stats.happiness > 100 ? (country.stats.happiness = 100) : null;
   }
 
   function expand() {
